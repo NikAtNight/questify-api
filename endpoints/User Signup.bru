@@ -1,0 +1,18 @@
+meta {
+  name: User Signup
+  type: http
+  seq: 3
+}
+
+post {
+  url: http://localhost/api/users/
+  body: json
+  auth: none
+}
+
+body:json {
+  {
+    "email": "nik@base.io",
+    "supabaseId": 234324234
+  }
+}
