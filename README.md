@@ -44,4 +44,8 @@ grant all privileges on database DB_NAME_CHANGE_ME to dbmaster;
 
 7. Run `python manage.py migrate`
 
-Your app should be up and running!
+8. Stop the web service now, cancel running the service in the terminal or run `docker compose down`
+
+9. Run `docker compose up`
+
+TA DA app should be running on `http://localhost`
