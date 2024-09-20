@@ -7,7 +7,7 @@ from .models import User
 class UserSerializer(serializers.ModelSerializer):
 
     firstName = serializers.CharField(source='first_name')
-    lastLame = serializers.CharField(source='last_name')
+    lastName = serializers.CharField(source='last_name')
     isActive = serializers.BooleanField(source='is_active')
     supabaseId = serializers.CharField(source='supabase_id')
 
@@ -18,7 +18,7 @@ class UserSerializer(serializers.ModelSerializer):
             'supabaseId',
             'email',
             'firstName',
-            'lastLame',
+            'lastName',
             'isActive'
         ]
         read_only_fields = ['id', 'supabaseId', 'email', 'isActive']
