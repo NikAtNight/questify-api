@@ -16,6 +16,7 @@ urlpatterns = [
     path('skynet/doc/', include('django.contrib.admindocs.urls')),
     path('skynet/', admin.site.urls),
     path('api/', include((combined_urls, 'budget'), namespace='v1')),
+    path("prometheus/", include("django_prometheus.urls")),
 ] + static(
     settings.STATIC_URL,
     document_root=settings.STATIC_ROOT

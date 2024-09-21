@@ -54,6 +54,7 @@ THIRD_PARTY_APPS = [
     'django_json_widget',                           # JSON viewer for admin
     'django_celery_beat',                           # scheduled tasks
     'import_export',                                # admin import / export
+    "django_prometheus",
 ]
 
 PROJECT_APPS = [
@@ -72,6 +73,12 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
+MIDDLEWARE = (
+    ["django_prometheus.middleware.PrometheusBeforeMiddleware"]
+    + MIDDLEWARE
+    + ["django_prometheus.middleware.PrometheusAfterMiddleware"]
+)
 
 STATIC_URL = '/static/'
 STATIC_ROOT = PARENT_DIR + "/static/"
