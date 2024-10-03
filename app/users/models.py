@@ -1,6 +1,8 @@
-from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
-from django.db import models
 import uuid
+
+from django.db import models
+from django.contrib.postgres.fields import JSONField
+from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 
 
 class UserManager(BaseUserManager):
@@ -74,3 +76,62 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     def __str__(self):
         return f'{self.first_name} {self.last_name} ({self.email})'
+
+
+class UserHabit(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
+    user = models.ForeignKey(
+        'users.User',
+        on_delete=models.CASCADE
+    )
+    habit = models.ForeignKey(
+        'habits.Habit',
+        on_delete=models.CASCADE
+    )
+    start_date = models.DateTimeField()
+    current_streak = models.IntegerField(
+        default=0
+    )
+    best_streak = models.IntegerField(
+        default=0
+    )
+    status = models.CharField(
+        max_length=50,
+        choices=[
+            ('Not Started', 'Not Started'),
+            ('In Progress', 'In Progress'),
+            ('Completed', 'Completed'),
+            ('Abandoned', 'Abandoned'),
+        ]
+    )
+    total_days_completed = models.IntegerField(
+        default=0
+    )
+    next_milestone = models.IntegerField()
+    next_skill_unlock = models.CharField(
+        max_length=255
+    )
+    progress_percentage = models.FloatField(
+        default=0.0
+    )
+    notifications_enabled = models.BooleanField(
+        default=True
+    )
+    habit_logs = JSONField()
+    completion_date = models.DateTimeField(
+        null=True,
+        blank=True
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
+
+    def __str__(self):
+        return f'{self.user.email} - {self.habit.name}'
