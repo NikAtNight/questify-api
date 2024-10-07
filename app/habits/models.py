@@ -1,6 +1,5 @@
 import uuid
 from django.db import models
-from django.contrib.postgres.fields import JSONField
 
 
 class Habit(models.Model):
@@ -9,17 +8,18 @@ class Habit(models.Model):
         default=uuid.uuid4,
         editable=False
     )
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
     name = models.CharField(
         max_length=255
     )
-    category = models.CharField(
-        max_length=100,
-        choices=[
-            ('Health', 'Health'),
-            ('Productivity', 'Productivity'),
-            ('Learning', 'Learning'),
-            # Add more categories as needed
-        ]
+    category = models.ManyToManyField(
+        'external.Category',
+        related_name='habits',
     )
     difficulty_level = models.CharField(
         max_length=50,
@@ -29,16 +29,16 @@ class Habit(models.Model):
             ('Hard', 'Hard'),
         ]
     )
-    milestones = JSONField()
+    milestones = models.JSONField(
+        default=list,
+        blank=True
+    )
     skills = models.ManyToManyField(
         'skills.Skill',
-        related_name='habits'
+        related_name='habits',
     )
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
-    updated_at = models.DateTimeField(
-        auto_now=True
+    experience = models.FloatField(
+        default=0.0
     )
 
     def __str__(self):

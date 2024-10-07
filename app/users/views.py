@@ -8,10 +8,14 @@ from rest_framework.decorators import action
 from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated, AllowAny
 
-from .models import User
+from .models import (
+    User,
+    UserHabit,
+)
 from .serializers import (
     UserSerializer,
     UserCreateSerializer,
+    UserHabitSerializer,
 )
 
 import logging
@@ -40,7 +44,7 @@ class UserViewSet(
         return [*extra_filters]
 
     def get_permissions(self):
-        if self.action in ['create', 'test']:
+        if self.action in ['create']:
             return [AllowAny()]
         return [IsAuthenticated()]
 
@@ -70,6 +74,8 @@ class UserViewSet(
 
         return Response(serializer_data.data, status=status.HTTP_200_OK)
 
-    @action(detail=False, methods=['get'], url_path='test', suffix='test')
-    def test(self, request):
-        return Response('No Autentication Required', status=status.HTTP_200_OK)
+    @action(detail=False, methods=['get'], url_path='habits', suffix='habits')
+    def habits(self, request):
+        user_habits = UserHabit.objects.filter(user=request.user)
+        serializer = UserHabitSerializer(user_habits, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)

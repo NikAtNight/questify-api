@@ -1,7 +1,6 @@
 import uuid
 
 from django.db import models
-from django.contrib.postgres.fields import JSONField
 from django.contrib.auth.models import AbstractBaseUser, PermissionsMixin, BaseUserManager
 
 
@@ -33,6 +32,21 @@ class User(AbstractBaseUser, PermissionsMixin):
         default=uuid.uuid4,
         editable=False
     )
+    is_active = models.BooleanField(
+        default=False
+    )
+    is_staff = models.BooleanField(
+        default=False
+    )
+    is_superuser = models.BooleanField(
+        default=False
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
     supabase_id = models.CharField(
         unique=True,
         null=True,
@@ -54,20 +68,16 @@ class User(AbstractBaseUser, PermissionsMixin):
         blank=True,
         null=True
     )
-    phone_number = models.CharField(
-        max_length=20,
-        blank=True,
-        null=True
-    )
     profile_pic = models.URLField(
         blank=True,
         null=True
     )
-    created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
-    is_active = models.BooleanField(default=False)
-    is_staff = models.BooleanField(default=False)
-    is_superuser = models.BooleanField(default=False)
+    experience = models.FloatField(
+        default=0.0
+    )
+    level = models.IntegerField(
+        default=1
+    )
 
     objects = UserManager()
 
@@ -84,6 +94,12 @@ class UserHabit(models.Model):
         default=uuid.uuid4,
         editable=False
     )
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+    updated_at = models.DateTimeField(
+        auto_now=True
+    )
     user = models.ForeignKey(
         'users.User',
         on_delete=models.CASCADE
@@ -92,12 +108,13 @@ class UserHabit(models.Model):
         'habits.Habit',
         on_delete=models.CASCADE
     )
-    start_date = models.DateTimeField()
-    current_streak = models.IntegerField(
-        default=0
+    start_date = models.DateTimeField(
+        null=True,
+        blank=True
     )
-    best_streak = models.IntegerField(
-        default=0
+    completion_date = models.DateTimeField(
+        null=True,
+        blank=True
     )
     status = models.CharField(
         max_length=50,
@@ -108,11 +125,21 @@ class UserHabit(models.Model):
             ('Abandoned', 'Abandoned'),
         ]
     )
+    current_streak = models.IntegerField(
+        default=0
+    )
+    best_streak = models.IntegerField(
+        default=0
+    )
     total_days_completed = models.IntegerField(
         default=0
     )
-    next_milestone = models.IntegerField()
+    next_milestone = models.IntegerField(
+        default=0
+    )
     next_skill_unlock = models.CharField(
+        null=True,
+        blank=True,
         max_length=255
     )
     progress_percentage = models.FloatField(
@@ -121,16 +148,9 @@ class UserHabit(models.Model):
     notifications_enabled = models.BooleanField(
         default=True
     )
-    habit_logs = JSONField()
-    completion_date = models.DateTimeField(
-        null=True,
+    habit_logs = models.JSONField(
+        default=list,
         blank=True
-    )
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
-    updated_at = models.DateTimeField(
-        auto_now=True
     )
 
     def __str__(self):
