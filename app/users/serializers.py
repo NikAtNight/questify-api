@@ -3,10 +3,7 @@ from django.core.exceptions import ValidationError
 
 from .models import (
     User,
-    UserHabit
 )
-
-from app.habits.models import Habit
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -48,52 +45,3 @@ class UserCreateSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(e.message_dict)
 
         return user
-
-
-class UserHabitSerializer(serializers.ModelSerializer):
-
-    habit = serializers.PrimaryKeyRelatedField(
-        queryset=Habit.objects.all()
-    )
-    currentStreak = serializers.IntegerField(
-        source='current_streak'
-    )
-    status = serializers.CharField(
-        source='status'
-    )
-    nextMilestone = serializers.IntegerField(
-        source='next_milestone'
-    )
-    nextSkillUnlock = serializers.CharField(
-        source='next_skill_unlock'
-    )
-    progressPercentage = serializers.FloatField(
-        source='progress_percentage'
-    )
-    notificationsEnabled = serializers.BooleanField(
-        source='notifications_enabled'
-    )
-
-    class Meta:
-        model = UserHabit
-        fields = [
-            'id',
-            'user',
-            'habit',
-            'status',
-            'currentStreak',
-            'nextMilestone',
-            'nextSkillUnlock',
-            'progressPercentage',
-            'notificationsEnabled',
-        ]
-        read_only_fields = [
-            'id',
-            'user',
-            'habit',
-            'status',
-            'currentStreak',
-            'nextMilestone',
-            'nextSkillUnlock',
-            'progressPercentage',
-        ]

@@ -10,12 +10,10 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 
 from .models import (
     User,
-    UserHabit,
 )
 from .serializers import (
     UserSerializer,
     UserCreateSerializer,
-    UserHabitSerializer,
 )
 
 import logging
@@ -25,11 +23,9 @@ logger = logging.getLogger(__name__)
 
 class UserViewSet(
     viewsets.GenericViewSet,
-    mixins.ListModelMixin,
     mixins.CreateModelMixin,
 ):
     queryset = User.objects.all()
-    account_lookup_kwarg = 'account_pk'
     list_filter_classes = [
         SearchFilter,
     ]
@@ -73,9 +69,3 @@ class UserViewSet(
         serializer_data = UserSerializer(request.user)
 
         return Response(serializer_data.data, status=status.HTTP_200_OK)
-
-    @action(detail=False, methods=['get'], url_path='habits', suffix='habits')
-    def habits(self, request):
-        user_habits = UserHabit.objects.filter(user=request.user)
-        serializer = UserHabitSerializer(user_habits, many=True)
-        return Response(serializer.data, status=status.HTTP_200_OK)

@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "budget-api"
+name = "questify-api"
 version = "0.1.0"
-description = "Budget App Backend"
+description = "Questify App Backend"
 authors = ["NikAtNight"]
 
 [tool.poetry.dependencies]
