@@ -105,9 +105,31 @@ class UserHabit(models.Model):
     notifications_enabled = models.BooleanField(
         default=True
     )
-    habit_logs = models.JSONField(
-        default=list,
-        blank=True
+    habit_logs = models.ManyToManyField(
+        'habits.HabitLog',
+        related_name='user_habits',
+    )
+
+    def __str__(self):
+        return f'{self.user.email} - {self.habit.name}'
+
+
+class HabitLog(models.Model):
+    id = models.UUIDField(
+        primary_key=True,
+        default=uuid.uuid4,
+        editable=False
+    )
+    created_at = models.DateTimeField(
+        auto_now_add=True
+    )
+    habit = models.ForeignKey(
+        'habits.Habit',
+        on_delete=models.CASCADE
+    )
+    user = models.ForeignKey(
+        'users.User',
+        on_delete=models.CASCADE
     )
 
     def __str__(self):

@@ -77,11 +77,11 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
-MIDDLEWARE = (
-    ["django_prometheus.middleware.PrometheusBeforeMiddleware"]
-    + MIDDLEWARE
-    + ["django_prometheus.middleware.PrometheusAfterMiddleware"]
-)
+MIDDLEWARE = [
+    "django_prometheus.middleware.PrometheusBeforeMiddleware",
+    *MIDDLEWARE,
+    "django_prometheus.middleware.PrometheusAfterMiddleware"
+]
 
 STATIC_URL = '/static/'
 STATIC_ROOT = PARENT_DIR + "/static/"

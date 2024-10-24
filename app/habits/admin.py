@@ -2,7 +2,11 @@ from django.contrib import admin
 from django.contrib.postgres.fields import JSONField
 from django_json_widget.widgets import JSONEditorWidget
 
-from .models import Habit, UserHabit
+from .models import (
+    Habit,
+    UserHabit,
+    HabitLog,
+)
 
 
 class HabitAdmin(admin.ModelAdmin):
@@ -124,5 +128,26 @@ class UserHabitAdmin(admin.ModelAdmin):
     }
 
 
+class HabitLogAdmin(admin.ModelAdmin):
+    list_display = (
+        'id',
+        'user',
+        'habit',
+        'created_at',
+    )
+    search_fields = [
+        'user__email',
+        'habit__name',
+    ]
+    list_filter = [
+        'created_at',
+    ]
+    ordering = [
+        'user__email',
+        'habit__name',
+    ]
+
+
 admin.site.register(Habit, HabitAdmin)
 admin.site.register(UserHabit, UserHabitAdmin)
+admin.site.register(HabitLog, HabitLogAdmin)

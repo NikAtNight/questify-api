@@ -1,7 +1,10 @@
 from rest_framework import serializers
 
-from .models import Habit
-from .models import UserHabit
+from .models import (
+    Habit,
+    UserHabit,
+    HabitLog,
+)
 from app.external.models import Category
 from app.skills.models import Skill
 
@@ -123,3 +126,68 @@ class UserHabitSerializer(serializers.ModelSerializer):
             'nextSkillUnlock',
             'progressPercentage',
         ]
+
+
+class HabitLogSerializer(serializers.ModelSerializer):
+    createdAt = serializers.DateTimeField(
+        source='created_at'
+    )
+
+    class Meta:
+        model = HabitLog
+        fields = [
+            'createdAt',
+        ]
+
+
+class UserHabitRetrieveSerializer(serializers.ModelSerializer):
+
+    habit = SlimHabitSerializer(
+        read_only=True
+    )
+    startDate = serializers.DateTimeField(
+        source='start_date'
+    )
+    completionDate = serializers.DateTimeField(
+        source='completion_date'
+    )
+    status = serializers.CharField()
+    currentStreak = serializers.IntegerField(
+        source='current_streak'
+    )
+    bestStreak = serializers.IntegerField(
+        source='best_streak'
+    )
+    totalDaysCompleted = serializers.IntegerField(
+        source='total_days_completed'
+    )
+    nextMilestone = serializers.IntegerField(
+        source='next_milestone'
+    )
+    nextSkillUnlock = serializers.CharField(
+        source='next_skill_unlock'
+    )
+    progressPercentage = serializers.FloatField(
+        source='progress_percentage'
+    )
+    notificationsEnabled = serializers.BooleanField(
+        source='notifications_enabled'
+    )
+
+    class Meta:
+        model = UserHabit
+        fields = [
+            'id',
+            'habit',
+            'startDate',
+            'completionDate',
+            'status',
+            'currentStreak',
+            'bestStreak',
+            'totalDaysCompleted',
+            'nextMilestone',
+            'nextSkillUnlock',
+            'progressPercentage',
+            'notificationsEnabled',
+        ]
+        read_only_fields = fields
