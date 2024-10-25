@@ -12,9 +12,12 @@ class HabitFilter(filters.BaseFilterBackend):
     def filter_queryset(self, request, queryset, view):
         user_habits = UserHabit.objects.filter(user=request.user)
 
-        # Exclude user habits that are not abandoned
+        # Exclude user habits that are not abandoned or completed
         queryset = queryset.exclude(
-            Q(id__in=user_habits.exclude(status=HabitStatusEnum.ABANDONED.name).values_list('habit', flat=True))
+            Q(id__in=user_habits.exclude(status__in=[
+                HabitStatusEnum.ABANDONED.name,
+                HabitStatusEnum.COMPLETED.name
+            ]).values_list('habit', flat=True))
         )
 
         return queryset
@@ -27,7 +30,5 @@ class UserHabitFilter(filters.BaseFilterBackend):
 
     def filter_queryset(self, request, queryset, view):
         queryset = queryset.filter(user=request.user)
-
-        queryset = queryset.exclude(status=HabitStatusEnum.ABANDONED.name)
 
         return queryset
