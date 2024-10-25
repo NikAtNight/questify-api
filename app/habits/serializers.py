@@ -7,6 +7,9 @@ from .models import (
 )
 from app.external.models import Category
 from app.skills.models import Skill
+from app.users.models import User
+from django.core.exceptions import ValidationError
+from django.utils import timezone
 
 
 class SlimCategorySerializer(serializers.ModelSerializer):
@@ -99,9 +102,6 @@ class UserHabitSerializer(serializers.ModelSerializer):
     progressPercentage = serializers.FloatField(
         source='progress_percentage'
     )
-    notificationsEnabled = serializers.BooleanField(
-        source='notifications_enabled'
-    )
 
     class Meta:
         model = UserHabit
@@ -114,7 +114,6 @@ class UserHabitSerializer(serializers.ModelSerializer):
             'nextMilestone',
             'nextSkillUnlock',
             'progressPercentage',
-            'notificationsEnabled',
         ]
         read_only_fields = [
             'id',
@@ -128,21 +127,41 @@ class UserHabitSerializer(serializers.ModelSerializer):
         ]
 
 
-class HabitLogSerializer(serializers.ModelSerializer):
-    createdAt = serializers.DateTimeField(
-        source='created_at'
+class SkillsSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Skill
+        fields = [
+            'id',
+            'name',
+            'milestones',
+        ]
+
+
+class SlimRetrieveHabitSerializer(serializers.ModelSerializer):
+
+    difficultyLevel = serializers.CharField(
+        source='difficulty_level'
+    )
+    skills = SkillsSerializer(
+        read_only=True,
+        many=True
     )
 
     class Meta:
-        model = HabitLog
+        model = Habit
         fields = [
-            'createdAt',
+            'id',
+            'name',
+            'difficultyLevel',
+            'skills',
         ]
+        read_only_fields = fields
 
 
 class UserHabitRetrieveSerializer(serializers.ModelSerializer):
 
-    habit = SlimHabitSerializer(
+    habit = SlimRetrieveHabitSerializer(
         read_only=True
     )
     startDate = serializers.DateTimeField(
@@ -170,9 +189,6 @@ class UserHabitRetrieveSerializer(serializers.ModelSerializer):
     progressPercentage = serializers.FloatField(
         source='progress_percentage'
     )
-    notificationsEnabled = serializers.BooleanField(
-        source='notifications_enabled'
-    )
 
     class Meta:
         model = UserHabit
@@ -188,6 +204,88 @@ class UserHabitRetrieveSerializer(serializers.ModelSerializer):
             'nextMilestone',
             'nextSkillUnlock',
             'progressPercentage',
-            'notificationsEnabled',
         ]
         read_only_fields = fields
+
+
+class UserHabitUpdateSerializer(serializers.ModelSerializer):
+
+    status = serializers.CharField()
+
+    def update(self, instance, validated_data):
+        status = validated_data.get('status', None)
+
+        if status is not None:
+            instance.status = status
+
+        instance.save()
+        return instance
+
+    class Meta:
+        model = UserHabit
+        fields = [
+            'status',
+        ]
+
+
+class HabitLogSerializer(serializers.ModelSerializer):
+    createdAt = serializers.DateTimeField(
+        source='created_at'
+    )
+
+    class Meta:
+        model = HabitLog
+        fields = [
+            'createdAt',
+        ]
+
+
+class HabitLogCreateSerializer(serializers.ModelSerializer):
+
+    user = serializers.PrimaryKeyRelatedField(
+        queryset=User.objects.all(),
+        write_only=True,
+        required=True,
+    )
+    habit = serializers.PrimaryKeyRelatedField(
+        queryset=Habit.objects.all(),
+        write_only=True,
+        required=True,
+    )
+
+    def create(self, validated_data):
+        try:
+            logs = HabitLog.objects.filter(
+                user=validated_data['user'],
+                habit=validated_data['habit'],
+                created_at__date=timezone.now().date(),
+            )
+
+            if logs.count() > 0:
+                raise serializers.ValidationError('Already logged this habit today')
+
+            habit_log = HabitLog.objects.create(**validated_data)
+
+            user_habit = UserHabit.objects.get(
+                user=validated_data['user'],
+                habit=validated_data['habit'],
+            )
+
+            user_habit.total_days_completed += 1
+            user_habit.current_streak += 1
+            if user_habit.current_streak > user_habit.best_streak:
+                user_habit.best_streak = user_habit.current_streak
+
+            user_habit.save()
+
+        except ValidationError as e:
+            raise serializers.ValidationError(e.message_dict)
+
+        return habit_log
+
+    class Meta:
+        model = HabitLog
+        fields = [
+            'user',
+            'habit',
+        ]

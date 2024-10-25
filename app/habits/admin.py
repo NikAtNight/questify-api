@@ -97,11 +97,6 @@ class UserHabitAdmin(admin.ModelAdmin):
                 'next_skill_unlock',
             )
         }),
-        ('Habit Logs', {
-            'fields': (
-                'habit_logs',
-            )
-        }),
     )
     readonly_fields = [
         'id',
@@ -121,11 +116,6 @@ class UserHabitAdmin(admin.ModelAdmin):
         'user__email',
         'habit__name',
     ]
-    formfield_overrides = {
-        JSONField: {
-            'widget': JSONEditorWidget(width='100%')
-        },
-    }
 
 
 class HabitLogAdmin(admin.ModelAdmin):

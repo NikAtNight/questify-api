@@ -49,7 +49,6 @@ THIRD_PARTY_APPS = [
     'rest_framework',                               # utilities for rest apis
     'django_filters',                               # for filtering rest endpoints
     'corsheaders',                                  # CORS header injection
-    # JWT blacklist functionality provider
     'rest_framework_simplejwt.token_blacklist',
     'django_json_widget',                           # JSON viewer for admin
     'django_celery_beat',                           # scheduled tasks
@@ -156,6 +155,49 @@ REST_FRAMEWORK = {
 }
 
 CRON_CLASSES = []
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {
+        "verbose": {
+            "format": "{levelname} {asctime} {module} {process:d} {thread:d} {message}",
+            "style": "{",
+        },
+        "simple": {
+            "format": "{levelname} {message}",
+            "style": "{",
+        },
+    },
+    "filters": {
+        "require_debug_true": {
+            "()": "django.utils.log.RequireDebugTrue",
+        },
+    },
+    "handlers": {
+        "console": {
+            "level": "INFO",
+            "filters": ["require_debug_true"],
+            "class": "logging.StreamHandler",
+            "formatter": "simple",
+        },
+        "mail_admins": {
+            "level": "ERROR",
+            "class": "django.utils.log.AdminEmailHandler",
+        },
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "propagate": True,
+        },
+        "django.request": {
+            "handlers": ["mail_admins"],
+            "level": "ERROR",
+            "propagate": False,
+        },
+    },
+}
 
 CACHES = {
     "default": {

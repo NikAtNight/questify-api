@@ -11,7 +11,8 @@ from app.users.views import (
 )
 from app.habits.views import (
     HabitViewSet,
-    UserHabitViewSet
+    UserHabitViewSet,
+    HabitLogViewSet,
 )
 
 
@@ -32,7 +33,7 @@ app_router = routers.SimpleRouter()
 app_router.register(r'users', UserViewSet, basename='users')
 app_router.register(r'habits', HabitViewSet, basename='habits')
 app_router.register(r'user-habits', UserHabitViewSet, basename='user-habits')
-
+app_router.register(r'habit-logs', HabitLogViewSet, basename='habit-logs')
 combined_urls = app_router.urls
 
 urlpatterns = [

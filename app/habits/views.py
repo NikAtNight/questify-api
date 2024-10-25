@@ -16,7 +16,9 @@ from .serializers import (
     HabitSerializer,
     UserHabitSerializer,
     UserHabitRetrieveSerializer,
+    UserHabitUpdateSerializer,
     HabitLogSerializer,
+    HabitLogCreateSerializer,
 )
 from app.users.filters import UserFilter
 from .filters import HabitFilter
@@ -53,6 +55,7 @@ class UserHabitViewSet(
     viewsets.GenericViewSet,
     mixins.ListModelMixin,
     mixins.RetrieveModelMixin,
+    mixins.UpdateModelMixin,
 ):
     queryset = UserHabit.objects.all()
     list_filter_classes = [
@@ -71,6 +74,8 @@ class UserHabitViewSet(
     def get_serializer_class(self):
         if self.action == 'retrieve':
             return UserHabitRetrieveSerializer
+        elif self.action == 'update':
+            return UserHabitUpdateSerializer
         return UserHabitSerializer
 
     def generate_serializer_data(self, request):
@@ -85,3 +90,49 @@ class UserHabitViewSet(
         ).order_by('-created_at')
         response.data['habitLogs'] = HabitLogSerializer(habit_log, many=True).data
         return Response(response.data, status=status.HTTP_200_OK)
+
+    def update(self, request, *args, **kwargs):
+        partial = kwargs.pop('partial', False)
+        instance = self.get_object()
+
+        serializer_data = self.generate_serializer_data(request)
+        serializer = self.get_serializer(instance, data=serializer_data, partial=partial)
+        serializer.is_valid(raise_exception=True)
+        self.perform_update(serializer)
+
+        updated_instance_serializer = UserHabitSerializer(instance)
+
+        return Response(updated_instance_serializer.data, status=status.HTTP_200_OK)
+
+
+class HabitLogViewSet(
+    viewsets.GenericViewSet,
+    mixins.CreateModelMixin,
+):
+    queryset = HabitLog.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def get_serializer_class(self):
+        if self.action == 'create':
+            return HabitLogCreateSerializer
+        return HabitLogSerializer
+
+    def generate_serializer_data(self, request):
+        serializer_data = copy.copy(request.data)
+
+        try:
+            user = request.user
+            serializer_data['user'] = user.pk
+        except Exception:
+            pass
+
+        return serializer_data
+
+    def create(self, request, *args, **kwargs):
+        serializer_data = self.generate_serializer_data(request)
+        serializer = self.get_serializer(data=serializer_data)
+        serializer.is_valid(raise_exception=True)
+
+        serializer.save()
+
+        return Response(status=status.HTTP_200_OK)
