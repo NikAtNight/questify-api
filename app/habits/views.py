@@ -70,7 +70,7 @@ class UserHabitViewSet(
         else:
             extra_filters = []
 
-        return [*extra_filters, UserFilter]
+        return [UserFilter, *extra_filters]
 
     def get_serializer_class(self):
         if self.action == 'retrieve':

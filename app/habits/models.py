@@ -1,8 +1,13 @@
 import uuid
 from django.db import models
+from app.core.enums import DifficultyLevelEnum, HabitStatusEnum
 
 
 class Habit(models.Model):
+    """Habit model."""
+
+    DIFFICULTY_LEVEL_CHOICES = DifficultyLevelEnum.tuples()
+
     id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
@@ -23,11 +28,7 @@ class Habit(models.Model):
     )
     difficulty_level = models.CharField(
         max_length=50,
-        choices=[
-            ('Easy', 'Easy'),
-            ('Medium', 'Medium'),
-            ('Hard', 'Hard'),
-        ]
+        choices=DIFFICULTY_LEVEL_CHOICES
     )
     milestones = models.JSONField(
         default=list,
@@ -46,6 +47,10 @@ class Habit(models.Model):
 
 
 class UserHabit(models.Model):
+    """UserHabit model."""
+
+    STATUS_CHOICES = HabitStatusEnum.tuples()
+
     id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
@@ -75,12 +80,7 @@ class UserHabit(models.Model):
     )
     status = models.CharField(
         max_length=50,
-        choices=[
-            ('Not Started', 'Not Started'),
-            ('In Progress', 'In Progress'),
-            ('Completed', 'Completed'),
-            ('Abandoned', 'Abandoned'),
-        ]
+        choices=STATUS_CHOICES
     )
     current_streak = models.IntegerField(
         default=0
