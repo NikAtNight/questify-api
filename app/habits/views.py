@@ -20,8 +20,7 @@ from .serializers import (
     HabitLogSerializer,
     HabitLogCreateSerializer,
 )
-from app.users.filters import UserFilter
-from .filters import HabitFilter
+from .filters import HabitFilter, UserHabitFilter
 
 
 class HabitViewSet(
@@ -64,13 +63,14 @@ class UserHabitViewSet(
     ]
     permission_classes = [IsAuthenticated]
 
-    def get_filter_backends(self):
+    @property
+    def filter_backends(self):
         if self.action == 'list':
             extra_filters = self.list_filter_classes
         else:
             extra_filters = []
 
-        return [UserFilter, *extra_filters]
+        return [UserHabitFilter, *extra_filters]
 
     def get_serializer_class(self):
         if self.action == 'retrieve':

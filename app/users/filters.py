@@ -1,7 +1,5 @@
 from rest_framework import filters
 
-from app.core.enums import HabitStatusEnum
-
 
 class UserFilter(filters.BaseFilterBackend):
     """
@@ -9,6 +7,6 @@ class UserFilter(filters.BaseFilterBackend):
     """
 
     def filter_queryset(self, request, queryset, view):
-        queryset = queryset.filter(user=request.user).exclude(status=HabitStatusEnum.ABANDONED)
+        queryset = queryset.filter(user=request.user)
 
         return queryset
