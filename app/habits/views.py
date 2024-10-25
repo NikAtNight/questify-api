@@ -34,13 +34,14 @@ class HabitViewSet(
     ]
     permission_classes = [IsAuthenticated]
 
-    def get_filter_backends(self):
+    @property
+    def filter_backends(self):
         if self.action == 'list':
             extra_filters = self.list_filter_classes
         else:
             extra_filters = []
 
-        return [*extra_filters, HabitFilter]
+        return [HabitFilter, *extra_filters]
 
     def get_serializer_class(self):
         return HabitSerializer

@@ -14,4 +14,4 @@ fi
 python manage.py migrate --no-input
 python manage.py collectstatic --no-input
 
-gunicorn app.wsgi:application -c gunicorn/gunicorn.conf.py --bind 0.0.0.0:8000 --reload 
+gunicorn app.wsgi:application -c gunicorn/gunicorn.conf.py --reload

@@ -13,7 +13,7 @@ threads = 1                # Number of threads per worker (if using threaded wor
 timeout = 30               # Workers silent for more than this many seconds are killed and restarted
 
 # Logging
-# accesslog = "-"            # Log access requests (use "-" for stdout)
+accesslog = "-"            # Log access requests (use "-" for stdout)
 errorlog = "-"             # Log errors (use "-" for stderr)
 loglevel = "info"          # Log level (debug, info, warning, error, critical)
 
