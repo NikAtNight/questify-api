@@ -102,9 +102,6 @@ class UserHabit(models.Model):
     progress_percentage = models.FloatField(
         default=0.0
     )
-    notifications_enabled = models.BooleanField(
-        default=True
-    )
     habit_logs = models.ManyToManyField(
         'habits.HabitLog',
         related_name='user_habits',

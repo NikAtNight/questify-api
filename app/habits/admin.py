@@ -85,7 +85,6 @@ class UserHabitAdmin(admin.ModelAdmin):
                 'start_date',
                 'completion_date',
                 'progress_percentage',
-                'notifications_enabled',
             )
         }),
         ('Habit Information', {
