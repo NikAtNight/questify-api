@@ -10,7 +10,6 @@ class Migration(migrations.Migration):
 
     dependencies = [
         ('external', '0001_initial'),
-        ('skills', '0001_initial'),
     ]
 
     operations = [
@@ -25,7 +24,6 @@ class Migration(migrations.Migration):
                 ('milestones', models.JSONField(blank=True, default=list)),
                 ('experience', models.FloatField(default=0.0)),
                 ('category', models.ManyToManyField(related_name='habits', to='external.category')),
-                ('skills', models.ManyToManyField(related_name='habits', to='skills.skill')),
             ],
         ),
     ]

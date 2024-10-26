@@ -6,7 +6,7 @@ from .models import (
     HabitLog,
 )
 from app.external.models import Category
-from app.skills.models import Skill
+from app.milestones.models import Milestone
 from app.users.models import User
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -23,16 +23,15 @@ class SlimCategorySerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class SkillSerializer(serializers.ModelSerializer):
+class MilestoneSerializer(serializers.ModelSerializer):
 
     class Meta:
-        model = Skill
+        model = Milestone
         fields = [
             'id',
             'name',
-            'description',
+            'day',
             'points',
-            'milestones',
         ]
         read_only_fields = fields
 
@@ -46,10 +45,7 @@ class HabitSerializer(serializers.ModelSerializer):
         read_only=True,
         many=True
     )
-    milestones = serializers.JSONField(
-        default=list,
-    )
-    skills = SkillSerializer(
+    milestones = MilestoneSerializer(
         read_only=True,
         many=True
     )
@@ -62,7 +58,6 @@ class HabitSerializer(serializers.ModelSerializer):
             'category',
             'difficultyLevel',
             'milestones',
-            'skills',
             'experience'
         ]
         read_only_fields = fields
@@ -127,14 +122,39 @@ class UserHabitSerializer(serializers.ModelSerializer):
         ]
 
 
-class SkillsSerializer(serializers.ModelSerializer):
+class UserHabitCreateSerializer(serializers.ModelSerializer):
+
+    habit = serializers.PrimaryKeyRelatedField(
+        queryset=Habit.objects.all(),
+        write_only=True,
+        required=True,
+    )
+
+    def create(self, validated_data):
+        habit = validated_data.pop('habit')
+
+        user_habit = UserHabit.objects.create(
+            user=self.context['request'].user,
+            habit=habit,
+        )
+        return user_habit
 
     class Meta:
-        model = Skill
+        model = UserHabit
+        fields = [
+            'habit',
+        ]
+
+
+class MilestoneSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Milestone
         fields = [
             'id',
             'name',
-            'milestones',
+            'day',
+            'points',
         ]
 
 
@@ -143,7 +163,7 @@ class SlimRetrieveHabitSerializer(serializers.ModelSerializer):
     difficultyLevel = serializers.CharField(
         source='difficulty_level'
     )
-    skills = SkillsSerializer(
+    milestones = MilestoneSerializer(
         read_only=True,
         many=True
     )
@@ -154,7 +174,7 @@ class SlimRetrieveHabitSerializer(serializers.ModelSerializer):
             'id',
             'name',
             'difficultyLevel',
-            'skills',
+            'milestones',
         ]
         read_only_fields = fields
 

@@ -36,14 +36,9 @@ class HabitAdmin(admin.ModelAdmin):
                 'milestones',
             ),
         }),
-        ('Skills', {
-            'fields': (
-                'skills',
-            ),
-        }),
     )
     filter_horizontal = [
-        'skills',
+        'milestones',
         'category',
     ]
     readonly_fields = [
@@ -93,7 +88,6 @@ class UserHabitAdmin(admin.ModelAdmin):
                 'best_streak',
                 'total_days_completed',
                 'next_milestone',
-                'next_skill_unlock',
             )
         }),
     )

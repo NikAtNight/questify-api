@@ -2,7 +2,7 @@ from django.db import models
 import uuid
 
 
-class Skill(models.Model):
+class Milestone(models.Model):
     id = models.UUIDField(
         primary_key=True,
         default=uuid.uuid4,
@@ -11,20 +11,13 @@ class Skill(models.Model):
     created_at = models.DateTimeField(
         auto_now_add=True
     )
-    updated_at = models.DateTimeField(
-        auto_now=True
-    )
     name = models.CharField(
         max_length=255
     )
-    description = models.TextField(
-        blank=True,
-        null=True
-    )
-    points = models.IntegerField(
+    day = models.IntegerField(
         default=0
     )
-    milestones = models.IntegerField(
+    points = models.IntegerField(
         default=0
     )
 

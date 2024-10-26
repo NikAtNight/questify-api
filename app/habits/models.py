@@ -30,12 +30,8 @@ class Habit(models.Model):
         max_length=50,
         choices=DIFFICULTY_LEVEL_CHOICES
     )
-    milestones = models.JSONField(
-        default=list,
-        blank=True
-    )
-    skills = models.ManyToManyField(
-        'skills.Skill',
+    milestones = models.ManyToManyField(
+        'milestones.Milestone',
         related_name='habits',
     )
     experience = models.FloatField(
@@ -94,17 +90,16 @@ class UserHabit(models.Model):
     next_milestone = models.IntegerField(
         default=0
     )
-    next_skill_unlock = models.CharField(
-        null=True,
-        blank=True,
-        max_length=255
-    )
     progress_percentage = models.FloatField(
         default=0.0
     )
     habit_logs = models.ManyToManyField(
         'habits.HabitLog',
         related_name='user_habits',
+    )
+    meta = models.JSONField(
+        default=dict,
+        blank=True
     )
 
     def __str__(self):

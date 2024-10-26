@@ -83,6 +83,15 @@ class UserHabitViewSet(
         serializer_data = copy.copy(request.data)
         return serializer_data
 
+    def create(self, request, *args, **kwargs):
+        serializer_data = self.generate_serializer_data(request)
+        serializer = self.get_serializer(data=serializer_data)
+        serializer.is_valid(raise_exception=True)
+
+        serializer.save()
+
+        return Response(serializer.data, status=status.HTTP_201_CREATED)
+
     def retrieve(self, request, *args, **kwargs):
         response = super().retrieve(request, *args, **kwargs)
         habit_log = HabitLog.objects.filter(
@@ -99,7 +108,8 @@ class UserHabitViewSet(
         serializer_data = self.generate_serializer_data(request)
         serializer = self.get_serializer(instance, data=serializer_data, partial=partial)
         serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
+
+        serializer.save()
 
         updated_instance_serializer = UserHabitSerializer(instance)
 

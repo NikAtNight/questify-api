@@ -1,37 +1,33 @@
 from django.contrib import admin
 
-from .models import Skill
+from .models import Milestone
 
 
-class SkillAdmin(admin.ModelAdmin):
+class MilestoneAdmin(admin.ModelAdmin):
     list_display = (
         'id',
         'name',
-        'description',
+        'day',
         'points',
-        'milestones',
     )
     fieldsets = (
         ('Basic Information', {
             'fields': (
                 'id',
                 'created_at',
-                'updated_at',
                 'name',
-                'description',
+                'day',
                 'points',
-                'milestones',
             ),
         }),
     )
     readonly_fields = [
         'id',
         'created_at',
-        'updated_at',
     ]
     search_fields = [
         'name',
     ]
 
 
-admin.site.register(Skill, SkillAdmin)
+admin.site.register(Milestone, MilestoneAdmin)
