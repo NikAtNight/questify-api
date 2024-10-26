@@ -151,7 +151,6 @@ class MilestoneSerializer(serializers.ModelSerializer):
     class Meta:
         model = Milestone
         fields = [
-            'id',
             'name',
             'day',
             'points',
@@ -203,9 +202,6 @@ class UserHabitRetrieveSerializer(serializers.ModelSerializer):
     nextMilestone = serializers.IntegerField(
         source='next_milestone'
     )
-    nextSkillUnlock = serializers.CharField(
-        source='next_skill_unlock'
-    )
     progressPercentage = serializers.FloatField(
         source='progress_percentage'
     )
@@ -222,7 +218,6 @@ class UserHabitRetrieveSerializer(serializers.ModelSerializer):
             'bestStreak',
             'totalDaysCompleted',
             'nextMilestone',
-            'nextSkillUnlock',
             'progressPercentage',
         ]
         read_only_fields = fields
