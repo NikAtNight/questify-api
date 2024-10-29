@@ -91,9 +91,6 @@ class UserHabitSerializer(serializers.ModelSerializer):
     nextMilestone = serializers.IntegerField(
         source='next_milestone'
     )
-    nextSkillUnlock = serializers.CharField(
-        source='next_skill_unlock'
-    )
     progressPercentage = serializers.FloatField(
         source='progress_percentage'
     )
@@ -107,7 +104,6 @@ class UserHabitSerializer(serializers.ModelSerializer):
             'status',
             'currentStreak',
             'nextMilestone',
-            'nextSkillUnlock',
             'progressPercentage',
         ]
         read_only_fields = [
@@ -117,7 +113,6 @@ class UserHabitSerializer(serializers.ModelSerializer):
             'status',
             'currentStreak',
             'nextMilestone',
-            'nextSkillUnlock',
             'progressPercentage',
         ]
 
