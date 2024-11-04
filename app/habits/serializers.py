@@ -315,7 +315,7 @@ class HabitLogCreateSerializer(serializers.ModelSerializer):
             if milestones.exists():
                 final_milestone_day = milestones.first().day
                 if final_milestone_day > 0:
-                    user_habit.progress_percentage = (user_habit.total_days_completed / final_milestone_day) * 100
+                    user_habit.progress_percentage = (user_habit.current_streak / final_milestone_day) * 100
                     user_habit.progress_percentage = min(user_habit.progress_percentage, 100.0)
             else:
                 user_habit.progress_percentage = 0.0
