@@ -311,6 +311,15 @@ class HabitLogCreateSerializer(serializers.ModelSerializer):
             if user_habit.current_streak > user_habit.best_streak:
                 user_habit.best_streak = user_habit.current_streak
 
+            milestones = validated_data['habit'].milestones.all().order_by('-day')
+            if milestones.exists():
+                final_milestone_day = milestones.first().day
+                if final_milestone_day > 0:
+                    user_habit.progress_percentage = (user_habit.total_days_completed / final_milestone_day) * 100
+                    user_habit.progress_percentage = min(user_habit.progress_percentage, 100.0)
+            else:
+                user_habit.progress_percentage = 0.0
+
             user_habit.save()
 
         except ValidationError as e:
