@@ -312,7 +312,9 @@ class HabitLogCreateSerializer(serializers.ModelSerializer):
                 user_habit.best_streak = user_habit.current_streak
 
             milestones = validated_data['habit'].milestones.all().order_by('-day')
-            if milestones.exists():
+            if days_between > 1:
+                user_habit.progress_percentage = (1 / milestones.first().day) * 100 if milestones.exists() else 0.0
+            elif milestones.exists():
                 final_milestone_day = milestones.first().day
                 if final_milestone_day > 0:
                     user_habit.progress_percentage = (user_habit.current_streak / final_milestone_day) * 100
