@@ -134,6 +134,8 @@ class HabitLogViewSet(
         try:
             user = request.user
             serializer_data['user'] = user.pk
+            timezone = request.headers.get('X-Timezone', 'UTC')
+            serializer_data['timezone'] = timezone
         except Exception:
             pass
 

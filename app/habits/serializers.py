@@ -10,6 +10,7 @@ from app.milestones.models import Milestone
 from app.users.models import User
 from django.core.exceptions import ValidationError
 from django.utils import timezone
+from zoneinfo import ZoneInfo
 
 
 class SlimCategorySerializer(serializers.ModelSerializer):
@@ -262,13 +263,21 @@ class HabitLogCreateSerializer(serializers.ModelSerializer):
         write_only=True,
         required=True,
     )
+    timezone = serializers.CharField(
+        write_only=True,
+        required=True,
+    )
 
     def create(self, validated_data):
+        tz = validated_data.pop('timezone')
         try:
+            user_tz = ZoneInfo(tz)
+            user_local_date = timezone.now().astimezone(user_tz).date()
+
             logs = HabitLog.objects.filter(
                 user=validated_data['user'],
                 habit=validated_data['habit'],
-                created_at__date=timezone.now().date(),
+                created_at__date=user_local_date,
             )
 
             if logs.count() > 0:
@@ -281,8 +290,24 @@ class HabitLogCreateSerializer(serializers.ModelSerializer):
                 habit=validated_data['habit'],
             )
 
+            # Get the most recent log before today
+            last_log = HabitLog.objects.filter(
+                user=validated_data['user'],
+                habit=validated_data['habit'],
+                created_at__date__lt=user_local_date
+            ).order_by('-created_at').first()
+
             user_habit.total_days_completed += 1
-            user_habit.current_streak += 1
+
+            if last_log:
+                days_between = (user_local_date - last_log.created_at.astimezone(user_tz).date()).days
+                if days_between == 1:
+                    user_habit.current_streak += 1
+                else:
+                    user_habit.current_streak = 1
+            else:
+                user_habit.current_streak = 1
+
             if user_habit.current_streak > user_habit.best_streak:
                 user_habit.best_streak = user_habit.current_streak
 
@@ -298,4 +323,5 @@ class HabitLogCreateSerializer(serializers.ModelSerializer):
         fields = [
             'user',
             'habit',
+            'timezone',
         ]
