@@ -87,7 +87,6 @@ class UserHabitAdmin(admin.ModelAdmin):
                 'current_streak',
                 'best_streak',
                 'total_days_completed',
-                'next_milestone',
             )
         }),
     )

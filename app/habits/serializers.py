@@ -11,6 +11,7 @@ from app.users.models import User
 from django.core.exceptions import ValidationError
 from django.utils import timezone
 from zoneinfo import ZoneInfo
+from app.core.enums import HabitStatusEnum
 
 
 class SlimCategorySerializer(serializers.ModelSerializer):
@@ -80,7 +81,19 @@ class SlimHabitSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class UserHabitSerializer(serializers.ModelSerializer):
+class NextMilestoneMixin:
+    def get_next_milestone(self, obj):
+        if not hasattr(obj, '_next_milestone'):
+            next_milestone = obj.habit.milestones.filter(
+                day__gt=obj.total_days_completed
+            ).order_by('day').first()
+            
+            obj._next_milestone = next_milestone.day if next_milestone else 0
+            
+        return obj._next_milestone
+
+
+class UserHabitSerializer(NextMilestoneMixin, serializers.ModelSerializer):
 
     habit = SlimHabitSerializer(
         read_only=True
@@ -89,11 +102,11 @@ class UserHabitSerializer(serializers.ModelSerializer):
     currentStreak = serializers.IntegerField(
         source='current_streak'
     )
-    nextMilestone = serializers.IntegerField(
-        source='next_milestone'
-    )
     progressPercentage = serializers.FloatField(
         source='progress_percentage'
+    )
+    nextMilestone = serializers.SerializerMethodField(
+        method_name='get_next_milestone'
     )
 
     class Meta:
@@ -132,6 +145,7 @@ class UserHabitCreateSerializer(serializers.ModelSerializer):
         user_habit = UserHabit.objects.create(
             user=self.context['request'].user,
             habit=habit,
+            start_date=timezone.now()
         )
         return user_habit
 
@@ -174,7 +188,7 @@ class SlimRetrieveHabitSerializer(serializers.ModelSerializer):
         read_only_fields = fields
 
 
-class UserHabitRetrieveSerializer(serializers.ModelSerializer):
+class UserHabitRetrieveSerializer(NextMilestoneMixin, serializers.ModelSerializer):
 
     habit = SlimRetrieveHabitSerializer(
         read_only=True
@@ -195,11 +209,11 @@ class UserHabitRetrieveSerializer(serializers.ModelSerializer):
     totalDaysCompleted = serializers.IntegerField(
         source='total_days_completed'
     )
-    nextMilestone = serializers.IntegerField(
-        source='next_milestone'
-    )
     progressPercentage = serializers.FloatField(
         source='progress_percentage'
+    )
+    nextMilestone = serializers.SerializerMethodField(
+        method_name='get_next_milestone'
     )
 
     class Meta:
@@ -274,6 +288,8 @@ class HabitLogCreateSerializer(serializers.ModelSerializer):
             user_tz = ZoneInfo(tz)
             user_local_date = timezone.now().astimezone(user_tz).date()
 
+            print(timezone.now().astimezone(user_tz))
+
             logs = HabitLog.objects.filter(
                 user=validated_data['user'],
                 habit=validated_data['habit'],
@@ -283,14 +299,16 @@ class HabitLogCreateSerializer(serializers.ModelSerializer):
             if logs.count() > 0:
                 raise serializers.ValidationError('Already logged this habit today')
 
-            habit_log = HabitLog.objects.create(**validated_data)
+            habit_log = HabitLog.objects.create(
+                **validated_data,
+                created_at=timezone.now().astimezone(user_tz)
+            )
 
             user_habit = UserHabit.objects.get(
                 user=validated_data['user'],
                 habit=validated_data['habit'],
             )
 
-            # Get the most recent log before today
             last_log = HabitLog.objects.filter(
                 user=validated_data['user'],
                 habit=validated_data['habit'],
@@ -305,20 +323,24 @@ class HabitLogCreateSerializer(serializers.ModelSerializer):
                     user_habit.current_streak += 1
                 else:
                     user_habit.current_streak = 1
+                    user_habit.progress_percentage = 0.0
             else:
                 user_habit.current_streak = 1
-
+                user_habit.progress_percentage = 0.0
             if user_habit.current_streak > user_habit.best_streak:
                 user_habit.best_streak = user_habit.current_streak
 
             milestones = validated_data['habit'].milestones.all().order_by('-day')
-            if days_between > 1:
-                user_habit.progress_percentage = (1 / milestones.first().day) * 100 if milestones.exists() else 0.0
-            elif milestones.exists():
+            if milestones.exists():
                 final_milestone_day = milestones.first().day
                 if final_milestone_day > 0:
                     user_habit.progress_percentage = (user_habit.current_streak / final_milestone_day) * 100
                     user_habit.progress_percentage = min(user_habit.progress_percentage, 100.0)
+
+                    # TODO: When complete, update user experience
+                    if user_habit.current_streak >= final_milestone_day:
+                        user_habit.status = HabitStatusEnum.COMPLETED.name
+                        user_habit.completion_date = timezone.now()
             else:
                 user_habit.progress_percentage = 0.0
 

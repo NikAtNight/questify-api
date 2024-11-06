@@ -6,6 +6,7 @@ from rest_framework.filters import SearchFilter
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 from rest_framework import status
+from rest_framework.decorators import action
 
 from .models import (
     Habit,
@@ -15,10 +16,12 @@ from .models import (
 from .serializers import (
     HabitSerializer,
     UserHabitSerializer,
+    UserHabitCreateSerializer,
     UserHabitRetrieveSerializer,
     UserHabitUpdateSerializer,
     HabitLogSerializer,
     HabitLogCreateSerializer,
+    MilestoneSerializer,
 )
 from .filters import HabitFilter, UserHabitFilter
 
@@ -50,6 +53,13 @@ class HabitViewSet(
 
         return serializer_data
 
+    @action(detail=True, methods=['get'], url_path='milestones', suffix='milestones')
+    def get_milestones(self, request, pk=None):
+        habit = self.get_object()
+        milestones = habit.milestones.all().order_by('day')
+        serializer = MilestoneSerializer(milestones, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class UserHabitViewSet(
     viewsets.GenericViewSet,
@@ -57,7 +67,7 @@ class UserHabitViewSet(
     mixins.RetrieveModelMixin,
     mixins.UpdateModelMixin,
 ):
-    queryset = UserHabit.objects.all()
+    queryset = UserHabit.objects.prefetch_related('habit__milestones')
     list_filter_classes = [
         SearchFilter,
     ]
@@ -73,7 +83,9 @@ class UserHabitViewSet(
         return [UserHabitFilter, *extra_filters]
 
     def get_serializer_class(self):
-        if self.action == 'retrieve':
+        if self.action == 'create':
+            return UserHabitCreateSerializer
+        elif self.action == 'retrieve':
             return UserHabitRetrieveSerializer
         elif self.action == 'update':
             return UserHabitUpdateSerializer

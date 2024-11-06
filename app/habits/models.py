@@ -76,7 +76,8 @@ class UserHabit(models.Model):
     )
     status = models.CharField(
         max_length=50,
-        choices=STATUS_CHOICES
+        choices=STATUS_CHOICES,
+        default=HabitStatusEnum.IN_PROGRESS.name
     )
     current_streak = models.IntegerField(
         default=0
@@ -85,9 +86,6 @@ class UserHabit(models.Model):
         default=0
     )
     total_days_completed = models.IntegerField(
-        default=0
-    )
-    next_milestone = models.IntegerField(
         default=0
     )
     progress_percentage = models.FloatField(
@@ -112,9 +110,7 @@ class HabitLog(models.Model):
         default=uuid.uuid4,
         editable=False
     )
-    created_at = models.DateTimeField(
-        auto_now_add=True
-    )
+    created_at = models.DateTimeField()
     habit = models.ForeignKey(
         'habits.Habit',
         on_delete=models.CASCADE
