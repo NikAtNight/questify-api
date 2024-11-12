@@ -87,9 +87,9 @@ class NextMilestoneMixin:
             next_milestone = obj.habit.milestones.filter(
                 day__gt=obj.current_streak
             ).order_by('day').first()
-            
+
             obj._next_milestone = next_milestone.day if next_milestone else 0
-            
+
         return obj._next_milestone
 
 

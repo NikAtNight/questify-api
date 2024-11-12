@@ -8,6 +8,8 @@ from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.decorators import action
 
+from django.utils import timezone
+
 from .models import (
     Habit,
     UserHabit,
@@ -106,11 +108,6 @@ class UserHabitViewSet(
 
     def retrieve(self, request, *args, **kwargs):
         response = super().retrieve(request, *args, **kwargs)
-        habit_log = HabitLog.objects.filter(
-            user=request.user,
-            habit=response.data['habit']['id']
-        ).order_by('-created_at')
-        response.data['habitLogs'] = HabitLogSerializer(habit_log, many=True).data
         return Response(response.data, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
@@ -130,10 +127,37 @@ class UserHabitViewSet(
 
 class HabitLogViewSet(
     viewsets.GenericViewSet,
+    mixins.ListModelMixin,
     mixins.CreateModelMixin,
 ):
     queryset = HabitLog.objects.all()
     permission_classes = [IsAuthenticated]
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        user = self.request.user
+        month = self.request.query_params.get('month')
+        year = self.request.query_params.get('year')
+        habitId = self.request.query_params.get('habitId')
+
+        if month and year:
+            try:
+                start_date = timezone.make_aware(
+                    timezone.datetime.strptime(f"{year}-{month}-01", "%Y-%m-%d")
+                )
+                end_date = timezone.make_aware(
+                    (start_date.replace(tzinfo=None) + timezone.timedelta(days=31)).replace(day=1)
+                )
+                queryset = queryset.filter(
+                    user=user,
+                    created_at__gte=start_date,
+                    created_at__lt=end_date,
+                    habit__id=habitId
+                )
+            except ValueError:
+                pass
+
+        return queryset
 
     def get_serializer_class(self):
         if self.action == 'create':
