@@ -85,7 +85,7 @@ class NextMilestoneMixin:
     def get_next_milestone(self, obj):
         if not hasattr(obj, '_next_milestone'):
             next_milestone = obj.habit.milestones.filter(
-                day__gt=obj.total_days_completed
+                day__gt=obj.current_streak
             ).order_by('day').first()
             
             obj._next_milestone = next_milestone.day if next_milestone else 0
